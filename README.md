@@ -16,6 +16,7 @@ Objective: To count how many unique orders were recorded in the database.
 Query:# Table/s -> orders / order_details
 
 SELECT COUNT(DISTINCT(order_id)) AS total_orders
+
 FROM orders;
 
 Insight: This query provides a foundational metric for understanding the volume of business operations.
@@ -27,8 +28,11 @@ Objective: To sum up the total income from all pizza sales.
 Query:# Table/s pizzas, order_details
 
 SELECT ROUND(SUM(od.quantity * p.price), 2) AS total_revenue
+
 FROM order_details AS od
+
 JOIN pizzas AS p
+
 ON od.pizza_id = p.pizza_id;
 
 Insight: Total revenue is a critical KPI (Key Performance Indicator) to assess overall business performance.
@@ -40,10 +44,15 @@ Objective: To find the name of the pizza type that has the maximum price.
 Query:# Table/s -> pizzas, pizza_types
 
 SELECT pt.name, p.price
+
 FROM pizza_types AS pt
+
 JOIN pizzas AS p
+
 ON pt.pizza_type_id = p.pizza_type_id
+
 ORDER BY p.price DESC
+
 LIMIT 1;
 
 Insight: Helps in understanding pricing strategy and identifying premium products.
@@ -55,11 +64,17 @@ Objective: To determine which pizza size is most frequently purchased by custome
 Query:# Tables/s -> pizzas, order_details
 
 SELECT p.size AS most_common_size
+
 FROM pizzas AS p
+
 JOIN order_details AS od
+
 ON p.pizza_id = od.pizza_id
+
 GROUP BY p.size
+
 ORDER BY COUNT(od.order_details_id) DESC
+
 LIMIT 1;
 
 Insight: Useful for inventory management and marketing strategies (e.g., promoting popular sizes or offering deals on less popular ones).
@@ -71,13 +86,21 @@ Objective: To identify the most popular pizza types based on the total quantity 
 Query:# Table/s -> pizza_types, pizzas, order_details
 
 SELECT pt.name AS pizza_type_name, SUM(od.quantity) AS total_quantity_ordered
+
 FROM pizza_types AS pt
+
 JOIN pizzas AS p
+
 ON p.pizza_type_id = pt.pizza_type_id
+
 JOIN order_details AS od
+
 ON od.pizza_id = p.pizza_id
+
 GROUP BY pt.name
+
 ORDER BY total_quantity_ordered DESC
+
 LIMIT 5;
 
 Insight: Highlights best-selling items, which can inform menu planning and promotional efforts.
@@ -89,12 +112,19 @@ Objective: To see the sales distribution across different pizza categories (e.g.
 Query:# Table/s -> pizza_types, order_details, pizzas
 
 SELECT pt.category, SUM(od.quantity) AS total_quantity
+
 FROM pizza_types AS pt
+
 JOIN pizzas AS p
+
 ON p.pizza_type_id = pt.pizza_type_id
+
 JOIN order_details AS od
+
 ON od.pizza_id = p.pizza_id
+
 GROUP BY pt.category
+
 ORDER BY total_quantity DESC;
 
 Insight: Provides an overview of which pizza categories are most popular, aiding in category-level strategic decisions.
@@ -106,8 +136,11 @@ Objective: To understand peak ordering times throughout the day.
 Query:# Table/s -> orders
 
 SELECT HOUR(time) AS order_hour, COUNT(order_id) AS number_of_orders
+
 FROM orders
+
 GROUP BY order_hour
+
 ORDER BY order_hour;
 
 Insight: Crucial for staffing, kitchen operations, and scheduling promotional activities during peak hours.
@@ -119,12 +152,19 @@ Objective: To count the number of orders per pizza category.
 Query:# Table/s -> pizza_types, pizzas, order_details
 
 SELECT pt.category, COUNT(DISTINCT od.order_id) AS number_of_orders
+
 FROM pizza_types AS pt
+
 JOIN pizzas AS p
+
 ON pt.pizza_type_id = p.pizza_type_id
+
 JOIN order_details AS od
+
 ON od.pizza_id = p.pizza_id
+
 GROUP BY pt.category
+
 ORDER BY number_of_orders DESC;
 
 Insight: Shows which categories drive the most distinct orders.
@@ -136,8 +176,10 @@ Objective: To find the average daily sales volume in terms of pizza quantity.
 Query:# Table/s -> Orders, Order_Details
 
 SELECT ROUND(AVG(daily_pizza_quantity), 2) AS avg_pizzas_ordered_per_day
+
 FROM (
-    SELECT o.date, SUM(od.quantity) AS daily_pizza_quantity
+
+SELECT o.date, SUM(od.quantity) AS daily_pizza_quantity
     FROM orders AS o
     JOIN order_details AS od
     ON o.order_id = od.order_id
@@ -153,13 +195,21 @@ Objective: To identify the pizza types that contribute the most to total revenue
 Query:# Table/s -> pizza_types, order_details, pizzas
 
 SELECT pt.name AS pizza_type_name, SUM(od.quantity * p.price) AS total_revenue_from_type
+
 FROM pizza_types AS pt
+
 JOIN pizzas AS p
+
 ON p.pizza_type_id = pt.pizza_type_id
+
 JOIN order_details AS od
+
 ON od.pizza_id = p.pizza_id
+
 GROUP BY pt.name
+
 ORDER BY total_revenue_from_type DESC
+
 LIMIT 3;
 
 Insight: Essential for revenue-driven marketing campaigns and optimizing menu offerings.
@@ -175,12 +225,19 @@ SELECT pt.category,
                                                    FROM order_details AS od_sub
                                                    JOIN pizzas AS p_sub
                                                    ON od_sub.pizza_id = p_sub.pizza_id), 2) AS revenue_percentage_contribution
+
 FROM order_details AS od
+
 JOIN pizzas AS p
+
 ON od.pizza_id = p.pizza_id
+
 JOIN pizza_types AS pt
+
 ON p.pizza_type_id = pt.pizza_type_id
+
 GROUP BY pt.category
+
 ORDER BY revenue_percentage_contribution DESC;
 
 Insight: Reveals the relative importance of each category to the overall business, guiding investment and focus areas.
@@ -193,8 +250,10 @@ Query:# Table/s -> order_details, pizzas, orders
 
 SELECT date,
        SUM(daily_revenue) OVER (ORDER BY date) AS cumulative_revenue
+
 FROM (
-    SELECT o.date,
+
+SELECT o.date,
            SUM(od.quantity * p.price) AS daily_revenue
     FROM order_details AS od
     JOIN pizzas AS p
@@ -213,6 +272,7 @@ Objective: To find the highest-earning pizza types within each category.
 Query:# Table/s -> order_details, pizza_types, pizzas
 
 SELECT category, name AS pizza_type_name, revenue
+
 FROM (
     SELECT pt.category,
            pt.name,
@@ -224,8 +284,11 @@ FROM (
     JOIN order_details AS od
     ON od.pizza_id = p.pizza_id
     GROUP BY pt.category, pt.name
+
 ) AS ranked_pizzas
+
 WHERE rank_in_category <= 3
+
 ORDER BY category, revenue DESC;
 
 Insight: Offers granular insights into product performance within specific categories, enabling targeted menu adjustments and promotions.
